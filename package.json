@@ -1,0 +1,184 @@
+{
+  "name": "code-functions",
+  "displayName": "Code Functions",
+  "description": "List all functions in files of the whole directory, just like Keil \"functions\" does.",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.120.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "functionList",
+          "title": "Function List",
+          "icon": "$(list-tree)"
+        }
+      ]
+    },
+    "views": {
+      "functionList": [
+        {
+          "id": "functionList",
+          "name": "Functions",
+          "icon": "$(symbol-function)",
+          "enableFindWidget": true
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "code-functions.refresh",
+        "title": "Refresh Function List",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "code-functions.searchFunction",
+        "title": "Search Functions",
+        "icon": "$(search)"
+      },
+      {
+        "command": "code-functions.jumpToFunction",
+        "title": "Jump to Function"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "code-functions.searchFunction",
+          "when": "view == functionList",
+          "group": "navigation@1"
+        },
+        {
+          "command": "code-functions.refresh",
+          "when": "view == functionList",
+          "group": "navigation@2"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Function List",
+      "properties": {
+        "functionList.profiles": {
+          "type": "object",
+          "default": {
+            "c": {
+              "viewMode": "flat",
+              "functionPattern": "^(?:static\\s+)?(?:inline\\s+)?(?:void|int|char|float|double|long|short|unsigned|bool|struct\\s+\\w+|\\w+)\\s+(\\w+)\\s*\\([^)]*\\)\\s*\\{",
+              "fileExtensions": [
+                ".c",
+                ".h"
+              ]
+            },
+            "cpp": {
+              "viewMode": "flat",
+              "functionPattern": "^(?:static\\s+)?(?:inline\\s+)?(?:virtual\\s+)?(?:void|int|char|float|double|long|short|unsigned|bool|auto|\\w+(?:::\\w+)*)\\s+(?:\\w+::)?(\\w+)\\s*\\([^)]*\\)\\s*(?:const\\s*)?\\{",
+              "fileExtensions": [
+                ".cpp",
+                ".cc",
+                ".cxx",
+                ".hpp",
+                ".hxx"
+              ]
+            },
+            "java": {
+              "viewMode": "structured",
+              "classPattern": "(?:public\\s+)?(?:abstract\\s+)?(?:final\\s+)?class\\s+(\\w+)",
+              "methodPattern": "(?:public|private|protected|static|final|abstract|synchronized|native)\\s+(?:<[^>]+>\\s+)?(?:void|int|char|float|double|long|short|boolean|byte|\\w+)\\s+(\\w+)\\s*\\([^)]*\\)\\s*(?:throws\\s+\\w+(?:\\s*,\\s*\\w+)*)?\\s*\\{",
+              "fileExtensions": [
+                ".java"
+              ]
+            },
+            "python": {
+              "viewMode": "flat",
+              "functionPattern": "^\\s*def\\s+(\\w+)\\s*\\([^)]*\\)\\s*:",
+              "fileExtensions": [
+                ".py"
+              ]
+            },
+            "javascript": {
+              "viewMode": "flat",
+              "functionPattern": "(?:function\\s+(\\w+)\\s*\\(|(\\w+)\\s*=\\s*(?:async\\s+)?\\(|(\\w+)\\s*\\([^)]*\\)\\s*\\{)",
+              "fileExtensions": [
+                ".js",
+                ".mjs"
+              ]
+            },
+            "typescript": {
+              "viewMode": "flat",
+              "functionPattern": "(?:function\\s+(\\w+)\\s*\\(|(\\w+)\\s*=\\s*(?:async\\s+)?\\(|(\\w+)\\s*\\([^)]*\\)\\s*\\{)",
+              "fileExtensions": [
+                ".ts",
+                ".tsx"
+              ]
+            }
+          },
+          "description": "Language profiles for function detection. Each profile defines viewMode (flat/structured), regex patterns, and file extensions."
+        },
+        "functionList.exclude": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "**/node_modules/**",
+            "**/.git/**",
+            "**/dist/**",
+            "**/out/**",
+            "**/build/**",
+            "**/.vscode/**"
+          ],
+          "description": "Glob patterns for directories/files to exclude from scanning."
+        },
+        "functionList.enableAutoRefresh": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically refresh the function list when a file is saved."
+        },
+        "functionList.useLanguageServer": {
+          "type": "boolean",
+          "default": true,
+          "description": "Use VS Code language server (e.g. 'Language Support for Java', 'Pylance') to provide precise function symbols. When disabled, only regex-based scanning is used."
+        },
+        "functionList.enableRegexFallback": {
+          "type": "boolean",
+          "default": true,
+          "description": "When useLanguageServer is enabled, fall back to regex-based scanning if the language server returns no symbols for a file. Set to false to rely solely on language server results."
+        },
+        "functionList.suggestJavaExtension": {
+          "type": "boolean",
+          "default": true,
+          "description": "When Java files are detected but no language server provides symbols, suggest installing 'Language Support for Java(TM) by Red Hat' for best results."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run package",
+    "compile": "webpack",
+    "watch": "webpack --watch",
+    "package": "webpack --mode production --devtool hidden-source-map",
+    "compile-tests": "tsc -p . --outDir out",
+    "watch-tests": "tsc -p . -w --outDir out",
+    "pretest": "npm run compile-tests && npm run compile && npm run lint",
+    "lint": "eslint src",
+    "test": "vscode-test"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^22.19.19",
+    "@types/vscode": "^1.120.0",
+    "@vscode/test-cli": "^0.0.12",
+    "@vscode/test-electron": "^2.5.2",
+    "eslint": "^9.39.3",
+    "ts-loader": "^9.5.4",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.56.1",
+    "webpack": "^5.105.3",
+    "webpack-cli": "^6.0.1"
+  }
+}
