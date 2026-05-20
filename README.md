@@ -1,71 +1,182 @@
-# code-functions README
+<h1><center>Code Functions</center></h1>
 
-This is the README for your extension "code-functions". After writing up a brief description, we recommend including the following sections.
+<center>将 Keil IDE 的"函数标签页"体验带到 VS Code 中。</center>
+<center>在侧边栏展示工作区所有函数列表，双击即可跳转到定义处。</center>
 
-## Features
-
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
-
-For example if there is an image subfolder under your extension project workspace:
-
-\!\[feature X\]\(images/feature-x.png\)
-
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
-
-## Requirements
-
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
-
-## Extension Settings
-
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
-
-For example:
-
-This extension contributes the following settings:
-
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
-
-## Known Issues
-
-Calling out known issues can help limit users opening duplicate issues against your extension.
-
-## Release Notes
-
-Users appreciate release notes as you update your extension.
-
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
+![Version](https://img.shields.io/badge/version-0.0.1-blue)
+![VS Code](https://img.shields.io/badge/vscode-%5E1.120.0-brightgreen)
 
 ---
 
-## Following extension guidelines
+## 功能特性
 
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
+### 🎯 核心功能
+- **全局函数扫描** — 遍历工作区所有源码文件，提取函数/方法定义
+- **侧边栏列表** — 以树形结构展示在独立视图 `Functions` 中
+- **双击跳转** — 点击任意函数，编辑器自动打开文件并定位到定义行
+- **实时搜索** — 视图标题栏搜索按钮（或 `Ctrl+F`），输入关键字即时过滤
 
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
+### 🧠 多语言支持
 
-## Working with Markdown
+通过 `settings.json` 配置不同语言的解析规则。内置 6 种语言 profile：
 
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
+| 语言 | 展示模式 | 说明 |
+|------|---------|------|
+| C | 平铺 (flat) | 正则匹配函数定义 |
+| C++ | 平铺 (flat) | 正则匹配函数定义 |
+| Java | 结构化 (structured) | 类 → 方法层级树 |
+| Python | 平铺 (flat) | 正则匹配 `def` 定义 |
+| JavaScript | 平铺 (flat) | 正则匹配函数/箭头函数 |
+| TypeScript | 平铺 (flat) | 同 JavaScript |
 
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
+### 🔌 语言服务器集成
 
-## For more information
+- **优先使用语言服务器** — 调用 `vscode.executeDocumentSymbolProvider` 获取由语言插件（如红帽 Java、Pylance）提供的精确符号信息
+- **正则 Fallback** — 当语言服务器不可用时自动回退到正则匹配
+- **Java 扩展推荐** — 检测到 Java 文件时，提示安装 "Language Support for Java(TM) by Red Hat"
 
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
+### 🛠 辅助功能
+- 手动刷新按钮
+- 文件保存自动刷新
+- 可配置排除目录（默认忽略 `node_modules`、`.git` 等）
+- 树节点默认折叠，按需展开
 
-**Enjoy!**
+---
+
+## 安装
+
+### 从源码构建
+
+```bash
+git clone <repo-url>
+cd code-functions
+npm install
+npm run compile
+```
+
+然后按 `F5` 启动扩展开发调试。
+
+### 从 VSIX 安装
+
+```bash
+npm install -g @vscode/vsce
+vsce package
+code --install-extension code-functions-0.0.1.vsix
+```
+
+---
+
+## 配置
+
+所有配置项均位于 `settings.json` 的 `functionList.*` 命名空间下。
+
+### `functionList.profiles`
+
+定义各语言的解析规则。每个 profile 包含：
+
+```jsonc
+{
+  "functionList.profiles": {
+    "java": {
+      "viewMode": "structured",        // "flat" 或 "structured"
+      "classPattern": "...",           // 类匹配正则（structured 模式）
+      "methodPattern": "...",          // 方法匹配正则（structured 模式）
+      "fileExtensions": [".java"]      // 关联的文件扩展名
+    },
+    "c": {
+      "viewMode": "flat",
+      "functionPattern": "...",        // 函数匹配正则（flat 模式）
+      "fileExtensions": [".c", ".h"]
+    }
+  }
+}
+```
+
+### `functionList.exclude`
+
+排除目录/文件的 glob 模式数组。
+
+- **类型**: `string[]`
+- **默认值**: `["**/node_modules/**", "**/.git/**", "**/dist/**", "**/out/**", "**/build/**", "**/.vscode/**"]`
+
+### `functionList.enableAutoRefresh`
+
+文件保存后自动刷新函数列表。
+
+- **类型**: `boolean`
+- **默认值**: `true`
+
+### `functionList.useLanguageServer`
+
+是否使用语言服务器（LSP）获取函数符号。关闭后仅使用正则匹配。
+
+- **类型**: `boolean`
+- **默认值**: `true`
+
+### `functionList.enableRegexFallback`
+
+当 `useLanguageServer` 开启但语言服务器无结果时，是否回退到正则匹配。
+
+- **类型**: `boolean`
+- **默认值**: `true`
+
+### `functionList.suggestJavaExtension`
+
+检测到 Java 文件但无语言服务器时，是否推荐安装红帽 Java 扩展。
+
+- **类型**: `boolean`
+- **默认值**: `true`
+
+---
+
+## 架构
+
+```
+src/
+├── extension.ts               # 入口：注册 TreeView、命令、事件监听
+├── scanner.ts                 # 核心：工作区函数扫描引擎（LSP + 正则）
+├── functionTreeProvider.ts    # 视图：TreeDataProvider 树形展示
+```
+
+### 扫描策略
+
+```
+scanFile(fileUri)
+  ├── useLanguageServer = true
+  │   └── vscode.executeDocumentSymbolProvider(uri)
+  │       ├── 有结果 → 使用 LSP 符号（精确）
+  │       └── 无结果 → 检查 enableRegexFallback
+  │           ├── true → 正则匹配
+  │           └── false → 返回空
+  └── useLanguageServer = false
+      └── 正则匹配
+```
+
+---
+
+## 开发
+
+```bash
+# 安装依赖
+npm install
+
+# 编译（开发模式，带 watch）
+npm run watch
+
+# 编译（生产模式）
+npm run package
+
+# 运行测试
+npm test
+
+# 代码检查
+npm run lint
+```
+
+---
+
+## 许可证
+
+本插件采用 MIT 许可证。
+
+
