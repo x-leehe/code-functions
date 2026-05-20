@@ -3,6 +3,10 @@
   "displayName": "Code Functions",
   "description": "List all functions in files of the whole directory, just like Keil \"functions\" does.",
   "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/x-leehe/code-functions"
+  },
   "engines": {
     "vscode": "^1.120.0"
   },
