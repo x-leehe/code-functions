@@ -5,6 +5,10 @@
 
 ![Version](https://img.shields.io/badge/version-0.0.1-blue)
 ![VS Code](https://img.shields.io/badge/vscode-%5E1.120.0-brightgreen)
+![AI](https://img.shields.io/badge/built%20with-DeepSeek%20V4%20Pro-6f42c1)
+
+> 🧠 本插件由 **DeepSeek V4 Pro** 辅助构建，以 **Vibe Coding** 方式完成全部代码编写。
+> 详见 [`Vibe-coding_instructions.md`](./Vibe-coding_instructions.md)，可指导任意 AI 编码助手复现工程。
 
 ---
 
@@ -178,5 +182,16 @@ npm run lint
 ## 许可证
 
 本插件采用 MIT 许可证。
+
+---
+
+## 🧠 Vibe Coding 复现
+
+本插件完全通过 **Vibe Coding** 方式开发，AI 模型为 **DeepSeek V4 Pro**。
+
+若希望用 AI 编码助手复现或改进此插件，请使用 [`Vibe-coding_instructions.md`](./Vibe-coding_instructions.md) 作为 Prompt：
+- 包含完整的架构设计、数据流、分步实现指南
+- 记录了 4 个关键坑点及解决方案
+- 按 6 步清单即可指导 AI 重建工程
 
 
