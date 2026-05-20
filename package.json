@@ -2,6 +2,7 @@
   "name": "code-functions",
   "displayName": "Code Functions",
   "description": "List all functions in files of the whole directory, just like Keil \"functions\" does.",
+  "publisher": "x-leehe",
   "version": "0.0.1",
   "repository": {
     "type": "git",
